@@ -25,6 +25,7 @@
           <li><a href="#dashboard" class="active">ダッシュボード</a></li>
           <li><a href="#chart-section">インタラクティブチャート</a></li>
           <li><a href="#simulator-section">予測シミュレーター</a></li>
+          <li><a href="#longterm-section">長期構造分析</a></li>
           <li><a href="#analysis-section">ファンダメンタルズ分析</a></li>
           <li><a href="#resources-section">重要リンク</a></li>
         </ul>
@@ -111,6 +112,8 @@
           <button class="btn-tab" data-period="1w">1週間</button>
           <button class="btn-tab active" data-period="1m">1ヶ月</button>
           <button class="btn-tab" data-period="1y">1年</button>
+          <button class="btn-tab" data-period="5y">5年</button>
+          <button class="btn-tab" data-period="10y">10年</button>
         </div>
       </div>
       <div class="chart-container">
@@ -221,6 +224,127 @@
           <span class="indicator-badge badge-buy" id="badge-ma">Strong Buy</span>
         </div>
       </div>
+    </section>
+
+    <!-- Long Term Structural Analysis & Timeline Section -->
+    <section id="longterm-section" class="glass-card col-span-12">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-hourglass-half"></i>
+          長期的な円相場の構造分析と歴史的変遷
+        </h2>
+      </div>
+      
+      <!-- Structural Drivers Grid -->
+      <div class="longterm-intro">
+        <p class="insight-item-desc" style="margin-bottom: 2rem;">
+          為替レートは短期的には日米金利差や投機筋の売買で大きく動きますが、長期（5〜10年スパン）では日本経済の構造変化や需給バランスのシフトが底流を形成します。現在進行している長期的な円安の背景には、以下のような構造的要因が指摘されています。
+        </p>
+      </div>
+
+      <div class="grid-cols-4" style="margin-bottom: 3rem;">
+        
+        <!-- Factor 1: Digital Deficit -->
+        <div class="glass-card structure-factor-card">
+          <div class="factor-icon-wrapper">
+            <i class="fa-solid fa-laptop-code"></i>
+          </div>
+          <h3 class="factor-title">デジタル赤字の拡大</h3>
+          <p class="factor-desc">
+            米国のクラウドサービス（AWS、Azure）、広告（Google、Meta）、サブスク（Netflix、Apple）などへの支払いは恒常的な「外貨買い・円売り」を発生させます。この「デジタル赤字」は年間約5兆円規模に達し、構造的な円安圧力となっています。
+          </p>
+        </div>
+
+        <!-- Factor 2: Shin NISA Outflows -->
+        <div class="glass-card structure-factor-card">
+          <div class="factor-icon-wrapper">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+          <h3 class="factor-title">新NISAと個人マネーの海外流出</h3>
+          <p class="factor-desc">
+            新NISAの開始に伴い、多くの個人投資家が「オルカン」や「S&P500」などの外国投資信託を選好しています。投資信託会社が海外資産を買い付けるための大量の円売り・外貨買いが継続的に発生し、実需的な円安要因となっています。
+          </p>
+        </div>
+
+        <!-- Factor 3: Income Balance shift -->
+        <div class="glass-card structure-factor-card">
+          <div class="factor-icon-wrapper">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <h3 class="factor-title">所得収支（配当金等）への依存構造</h3>
+          <p class="factor-desc">
+            日本の経常収支は黒字を維持していますが、かつての「貿易黒字（モノを売って円を買う）」から、海外投資の配当や金利による「所得収支黒字」へ中身が変化しました。これらの配当の多くは現地で再投資され、日本国内に還流（円買い）しにくいため、円安を食い止める力になりにくい特徴があります。
+          </p>
+        </div>
+
+        <!-- Factor 4: Energy Dependency -->
+        <div class="glass-card structure-factor-card">
+          <div class="factor-icon-wrapper">
+            <i class="fa-solid fa-oil-well"></i>
+          </div>
+          <h3 class="factor-title">エネルギー・資源依存度の高さ</h3>
+          <p class="factor-desc">
+            日本は原油やLNG（液化天然ガス）のほとんどを輸入に頼っているため、資源価格の高騰（原油高）が起きると輸入金額が膨れ上がり、貿易赤字が拡大します。これにより輸入企業による決済用の巨額の円売りが恒常的に発生します。
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Timeline wrapper -->
+      <h3 class="card-title" style="margin-bottom: 2rem; font-size: 1.25rem;">
+        <i class="fa-solid fa-timeline"></i>
+        ドル円レートの歴史的マイルストーン (1985 - 現在)
+      </h3>
+      <div class="timeline-container">
+        
+        <div class="timeline-item">
+          <div class="timeline-badge">1985</div>
+          <div class="timeline-content">
+            <h4>プラザ合意 (円高の起点)</h4>
+            <p>先進5カ国がドル高是正に合意。当時240円台だったドル円は急速に円高へと向かい、1年後には150円台へ急騰。日本のバブル経済とその後の崩壊への契機となりました。</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-badge">2011</div>
+          <div class="timeline-content">
+            <h4>超円高期・史上最高値 (75.32円)</h4>
+            <p>東日本大震災後の円買いや、リーマンショック後の米超金融緩和を背景に史上最高値の75円32銭を記録。輸出産業が大打撃を受け、急激な産業の海外移転が進みました。</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-badge">2013</div>
+          <div class="timeline-content">
+            <h4>アベノミクス・異次元金融緩和</h4>
+            <p>日銀の黒田総裁による「量的・質的金融緩和（バズーカ）」が開始。過度な円高が修正され、100円前後から120円台までの大幅な円安トレンドへと転換しました。</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-badge">2020</div>
+          <div class="timeline-content">
+            <h4>コロナショック (一時的な円高・混迷期)</h4>
+            <p>世界的なパンデミック発生により一時的に安全資産としての円が買われる局面もありましたが、世界的な金融緩和の合唱により100円〜110円のレンジで推移しました。</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-badge">2022~</div>
+          <div class="timeline-content">
+            <h4>世界的利上げ局面と激しい円安 (150円台突破)</h4>
+            <p>インフレに対抗する米FRBの急激な利上げに対し、日銀はマイナス金利を継続したため、極端な金利差が生じました。30年ぶりの円安水準となり、為替介入が繰り返される事態へと突入しました。</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Government sources and long term analysis links -->
+      <div class="longterm-sources" style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; color: var(--color-text-secondary);">
+        <i class="fa-solid fa-circle-info" style="color: var(--color-accent); margin-right: 0.5rem;"></i>
+        長期的な時系列分析・日本の経済構造統計については、<a href="https://www5.cao.go.jp/keizai3/whitepaper.html" target="_blank" style="color: var(--color-accent); text-decoration: underline;">内閣府 年次経済財政報告（経済白書）</a> や <a href="https://www.stat-search.boj.or.jp/" target="_blank" style="color: var(--color-accent); text-decoration: underline;">日本銀行 時系列統計データ検索サイト</a> から公式の一次情報が参照可能です。
+      </div>
+
     </section>
 
     <!-- Fundamental Analysis & Report -->
@@ -343,6 +467,7 @@
       <a href="#dashboard">ダッシュボード</a>
       <a href="#chart-section">過去チャート</a>
       <a href="#simulator-section">シミュレーター</a>
+      <a href="#longterm-section">長期構造分析</a>
       <a href="#resources-section">重要リンク一覧</a>
     </div>
   </footer>
