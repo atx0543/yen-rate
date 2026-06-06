@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JPY Analyser | 円レート多角分析・シミュレーション</title>
+  <meta name="description" content="円レートのリアルタイム分析、金利差シミュレーター、テクニカル分析指標、および主要経済データソースへのダイレクトリンクを提供する高度なFX分析ダッシュボード。">
+  <link rel="stylesheet" href="style.css">
+  <!-- FontAwesome CDN for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <div class="logo-icon">¥</div>
+        <span>JPY Analyser</span>
+      </a>
+      <nav>
+        <ul>
+          <li><a href="#dashboard" class="active">ダッシュボード</a></li>
+          <li><a href="#chart-section">インタラクティブチャート</a></li>
+          <li><a href="#simulator-section">予測シミュレーター</a></li>
+          <li><a href="#analysis-section">ファンダメンタルズ分析</a></li>
+          <li><a href="#resources-section">重要リンク</a></li>
+        </ul>
+      </nav>
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <span>LIVE UPDATES</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main>
+    
+    <!-- Top Dashboard Section: Quick Rates -->
+    <section id="dashboard" class="col-span-12">
+      <div class="grid-cols-4">
+        
+        <!-- USD/JPY -->
+        <div class="glass-card rate-card" id="card-usdjpy">
+          <div class="card-header">
+            <span class="rate-pair">米ドル / 円 (USD/JPY)</span>
+            <i class="fa-solid fa-dollar-sign" style="color: #4fc3f7;"></i>
+          </div>
+          <div class="rate-value" id="val-usdjpy">156.45</div>
+          <div class="rate-change up" id="change-usdjpy">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>+0.24% (+0.38)</span>
+          </div>
+        </div>
+
+        <!-- EUR/JPY -->
+        <div class="glass-card rate-card" id="card-eurjpy">
+          <div class="card-header">
+            <span class="rate-pair">ユーロ / 円 (EUR/JPY)</span>
+            <i class="fa-solid fa-euro-sign" style="color: #a1887f;"></i>
+          </div>
+          <div class="rate-value" id="val-eurjpy">169.82</div>
+          <div class="rate-change up" id="change-eurjpy">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>+0.12% (+0.20)</span>
+          </div>
+        </div>
+
+        <!-- GBP/JPY -->
+        <div class="glass-card rate-card" id="card-gbpjpy">
+          <div class="card-header">
+            <span class="rate-pair">英ポンド / 円 (GBP/JPY)</span>
+            <i class="fa-solid fa-sterling-sign" style="color: #81c784;"></i>
+          </div>
+          <div class="rate-value" id="val-gbpjpy">199.15</div>
+          <div class="rate-change down" id="change-gbpjpy">
+            <i class="fa-solid fa-arrow-trend-down"></i>
+            <span>-0.08% (-0.16)</span>
+          </div>
+        </div>
+
+        <!-- AUD/JPY -->
+        <div class="glass-card rate-card" id="card-audjpy">
+          <div class="card-header">
+            <span class="rate-pair">豪ドル / 円 (AUD/JPY)</span>
+            <i class="fa-solid fa-austral-sign" style="color: #ffd54f;"></i>
+          </div>
+          <div class="rate-value" id="val-audjpy">103.58</div>
+          <div class="rate-change up" id="change-audjpy">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>+0.05% (+0.05)</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Mid Section: Chart & Simulator -->
+    <!-- Main Chart Section -->
+    <section id="chart-section" class="glass-card col-span-8">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-chart-line"></i>
+          ドル円 (USD/JPY) 過去推移チャート
+        </h2>
+        <div class="chart-controls">
+          <button class="btn-tab" data-period="1d">1日</button>
+          <button class="btn-tab" data-period="1w">1週間</button>
+          <button class="btn-tab active" data-period="1m">1ヶ月</button>
+          <button class="btn-tab" data-period="1y">1年</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="mainRateChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Simulator Section -->
+    <section id="simulator-section" class="glass-card col-span-4">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-sliders"></i>
+          ドル円レート感応度シミュレーター
+        </h2>
+      </div>
+      <div class="simulator-panel">
+        
+        <!-- Input 1: Interest Rate Differential -->
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>内外金利差 (米政策金利 - 日政策金利)</span>
+            <span class="slider-val" id="label-interest-diff">5.25 %</span>
+          </div>
+          <input type="range" id="range-interest-diff" min="0" max="8.0" step="0.25" value="5.25">
+        </div>
+
+        <!-- Input 2: Risk Sentiment -->
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>市場の投資心理 (センチメント)</span>
+            <span class="slider-val" id="label-risk">ニュートラル</span>
+          </div>
+          <input type="range" id="range-risk" min="1" max="5" step="1" value="3">
+        </div>
+
+        <!-- Input 3: Trade Balance -->
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>本邦の貿易収支状況</span>
+            <span class="slider-val" id="label-trade">軽微な赤字</span>
+          </div>
+          <input type="range" id="range-trade" min="-3" max="3" step="1" value="-1">
+        </div>
+
+        <!-- Sim Output Display -->
+        <div class="sim-output-box">
+          <div class="sim-output-left">
+            <span class="sim-output-title">シミュレーション予測値</span>
+            <div class="sim-output-val" id="sim-predicted-rate">156.45 円</div>
+            <span class="sim-output-desc" id="sim-predicted-desc">現在の金利差と需給水準から弾き出された理論値。</span>
+          </div>
+          
+          <!-- SVG Gauge -->
+          <div class="gauge-container">
+            <svg class="gauge-svg">
+              <defs>
+                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#00e5ff" />
+                  <stop offset="100%" stop-color="#8a2be2" />
+                </linearGradient>
+              </defs>
+              <circle class="gauge-bg" cx="45" cy="45" r="40"></circle>
+              <circle class="gauge-bar" id="gauge-progress" cx="45" cy="45" r="40"></circle>
+            </svg>
+            <div class="gauge-text" id="gauge-percentage">
+              62%
+              <span>円安圧力</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Bottom Section: Technical indicators & Fundamental Insights -->
+    <!-- Technical Analysis Card -->
+    <section id="technical-section" class="glass-card col-span-4">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-gauge-high"></i>
+          テクニカル・メーター
+        </h2>
+      </div>
+      <div class="tech-indicators-grid">
+        <!-- Relative Strength Index -->
+        <div class="indicator-row">
+          <div class="indicator-info">
+            <span class="indicator-name">RSI (14)</span>
+            <span class="indicator-value" id="val-rsi">RSI: 58.4 (中立値)</span>
+          </div>
+          <span class="indicator-badge badge-neutral" id="badge-rsi">Neutral</span>
+        </div>
+        <!-- MACD -->
+        <div class="indicator-row">
+          <div class="indicator-info">
+            <span class="indicator-name">MACD (12, 26, 9)</span>
+            <span class="indicator-value" id="val-macd">ゴールデンクロス直後</span>
+          </div>
+          <span class="indicator-badge badge-buy" id="badge-macd">Buy</span>
+        </div>
+        <!-- Moving Average -->
+        <div class="indicator-row">
+          <div class="indicator-info">
+            <span class="indicator-name">移動平均線 (SMA 20/50/200)</span>
+            <span class="indicator-value" id="val-ma">SMA20の上方で推移</span>
+          </div>
+          <span class="indicator-badge badge-buy" id="badge-ma">Strong Buy</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fundamental Analysis & Report -->
+    <section id="analysis-section" class="glass-card col-span-8">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-brain"></i>
+          ファンダメンタルズ重要ポイント分析
+        </h2>
+      </div>
+      <div class="insights-content">
+        <div class="insight-item">
+          <div class="insight-item-title">
+            1. 日米金利差の動向 — <a href="https://www.federalreserve.gov/monetarypolicy/fomc.htm" target="_blank" style="color: var(--color-accent); text-decoration: underline;">FRB (FOMC公式発表)</a> &amp; <a href="https://www.boj.or.jp/mopo/index.htm" target="_blank" style="color: var(--color-accent); text-decoration: underline;">日銀金融政策決定会合</a>
+          </div>
+          <div class="insight-item-desc">
+            ドル円レートを支配する最大の要因は金利差です。米国の高金利維持（利下げ遅延）と日銀の段階的な利上げペースの乖離が「円安・ドル高」を誘発しやすい構造になっています。FOMCの声明や日銀総裁会見は真っ先にチェックすべき対象です。
+          </div>
+        </div>
+        
+        <div class="insight-item">
+          <div class="insight-item-title">
+            2. 本邦実需の円売り圧力 — <a href="https://www.customs.go.jp/toukei/info/" target="_blank" style="color: var(--color-accent); text-decoration: underline;">財務省貿易統計データ</a>
+          </div>
+          <div class="insight-item-desc">
+            エネルギー輸入による恒常的な貿易赤字や、日本の機関投資家による海外投資（外貨への投資）は、実需筋の「円売り・ドル買い」フローを生み出し、金利差とは別に恒常的な円安圧力を生み出します。
+          </div>
+        </div>
+
+        <div class="insight-item">
+          <div class="insight-item-title">
+            3. 為替介入と市場の流動性 — <a href="https://www.mof.go.jp/policy/international_policy/reference/feio/index.htm" target="_blank" style="color: var(--color-accent); text-decoration: underline;">財務省 外国為替平衡操作実施状況</a>
+          </div>
+          <div class="insight-item-desc">
+            急激な円安の進行に対しては、日本政府・日銀による覆面および公表での「円買い介入」が実施されることがあります。一時的にドル円が数円下落するトリガーとなります。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Important Resources Section (Required Links) -->
+    <section id="resources-section" class="glass-card col-span-12">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-circle-nodes"></i>
+          円レート分析に不可欠な公式・外部重要リンク
+        </h2>
+      </div>
+      <p class="insight-item-desc" style="margin-bottom: 1.5rem;">
+        円相場を精緻に追うために市場参加者がリアルタイムに参照している、公式データ・一次情報源および高機能チャートへのリンクです。
+      </p>
+      
+      <div class="resource-grid">
+        
+        <!-- Yahoo Finance -->
+        <a href="https://finance.yahoo.co.jp/quote/USDJPY=FX" target="_blank" class="resource-card">
+          <div class="resource-icon"><i class="fa-solid fa-chart-area"></i></div>
+          <div class="resource-details">
+            <span class="resource-name">Yahoo!ファイナンス - ドル円</span>
+            <span class="resource-desc">一般投資家に最も親しまれている日本語の為替板情報</span>
+          </div>
+        </a>
+
+        <!-- TradingView JPY Index -->
+        <a href="https://jp.tradingview.com/symbols/TVC-DXY/" target="_blank" class="resource-card">
+          <div class="resource-icon"><i class="fa-solid fa-arrows-spin"></i></div>
+          <div class="resource-details">
+            <span class="resource-name">TradingView ドル・円インデックス</span>
+            <span class="resource-desc">テクニカル指標が豊富で高精度な為替指数チャート</span>
+          </div>
+        </a>
+
+        <!-- Bloomberg FX -->
+        <a href="https://www.bloomberg.co.jp/markets/currencies" target="_blank" class="resource-card">
+          <div class="resource-icon"><i class="fa-solid fa-newspaper"></i></div>
+          <div class="resource-details">
+            <span class="resource-name">Bloomberg 外国為替センター</span>
+            <span class="resource-desc">機関投資家向けの為替速報、主要ニュース、相場情報</span>
+          </div>
+        </a>
+
+        <!-- Bank of Japan -->
+        <a href="https://www.boj.or.jp/" target="_blank" class="resource-card">
+          <div class="resource-icon"><i class="fa-solid fa-landmark"></i></div>
+          <div class="resource-details">
+            <span class="resource-name">日本銀行 (Bank of Japan)</span>
+            <span class="resource-desc">円の通貨番人である日銀の最新金融政策・声明・データ</span>
+          </div>
+        </a>
+
+        <!-- MOF FX Operations -->
+        <a href="https://www.mof.go.jp/policy/international_policy/reference/feio/index.htm" target="_blank" class="resource-card">
+          <div class="resource-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="resource-details">
+            <span class="resource-name">財務省 外国為替平衡操作実績</span>
+            <span class="resource-desc">為替介入が行われた金額・実績の公表データ（一次情報）</span>
+          </div>
+        </a>
+
+        <!-- FOMC Calendar -->
+        <a href="https://www.federalreserve.gov/monetarypolicy/fomc.htm" target="_blank" class="resource-card">
+          <div class="resource-icon"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="resource-details">
+            <span class="resource-name">Federal Reserve (FOMC)</span>
+            <span class="resource-desc">FRBの政策決定、金利予測（ドットチャート）などを公開</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      © 2026 JPY Analyser Dashboard. All Rights Reserved.
+    </div>
+    <div class="footer-links">
+      <a href="#dashboard">ダッシュボード</a>
+      <a href="#chart-section">過去チャート</a>
+      <a href="#simulator-section">シミュレーター</a>
+      <a href="#resources-section">重要リンク一覧</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
