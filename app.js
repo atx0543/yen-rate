@@ -1,25 +1,48 @@
 // Mock Historical Data Generator
-function generateMockData(count, base, volatility) {
+function generateMockData(count, base, volatility, type = 'day') {
   const data = [];
   const labels = [];
   let currentVal = base;
   const now = new Date();
 
   for (let i = count - 1; i >= 0; i--) {
-    const change = (Math.random() - 0.48) * volatility;
-    currentVal = parseFloat((currentVal + change).toFixed(2));
-    
-    // Labels formatting
-    const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    if (count <= 24) {
-      labels.push(`${24 - i}:00`);
-    } else if (count <= 7) {
-      const days = ['日', '月', '火', '水', '木', '金', '土'];
-      labels.push(days[date.getDay()] + '曜');
-    } else if (count <= 30) {
-      labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
-    } else {
+    let date;
+    if (type === 'hour') {
+      date = new Date(now.getTime() - i * 60 * 60 * 1000);
+      labels.push(`${date.getHours()}:00`);
+    } else if (type === 'day') {
+      date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      if (count <= 7) {
+        const days = ['日', '月', '火', '水', '木', '金', '土'];
+        labels.push(days[date.getDay()] + '曜');
+      } else {
+        labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+      }
+    } else if (type === 'month') {
+      date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       labels.push(`${date.getFullYear()}/${date.getMonth() + 1}`);
+    } else if (type === 'month_long') {
+      date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      if (date.getMonth() === 0 || i === 0 || i === count - 1) {
+        labels.push(`${date.getFullYear()}年`);
+      } else {
+        labels.push(`${date.getMonth() + 1}月`);
+      }
+    } else if (type === 'year') {
+      date = new Date(now.getFullYear() - i, 0, 1);
+      labels.push(`${date.getFullYear()}年`);
+    }
+
+    // Generate trend (upward base growth for long-term JPY weakening)
+    if (type === 'month_long' || type === 'year') {
+      const progress = (count - i) / count;
+      const targetBase = 156.45;
+      const expectedValue = base + (targetBase - base) * progress;
+      const randomOffset = (Math.random() - 0.5) * volatility;
+      currentVal = parseFloat((expectedValue + randomOffset).toFixed(2));
+    } else {
+      const change = (Math.random() - 0.48) * volatility;
+      currentVal = parseFloat((currentVal + change).toFixed(2));
     }
     
     data.push(currentVal);
@@ -29,10 +52,12 @@ function generateMockData(count, base, volatility) {
 
 // Data Stores for Chart
 const chartDataSets = {
-  '1d': generateMockData(24, 156.45, 0.25),
-  '1w': generateMockData(7, 155.80, 0.90),
-  '1m': generateMockData(30, 154.50, 1.50),
-  '1y': generateMockData(12, 142.00, 5.00)
+  '1d': generateMockData(24, 156.45, 0.25, 'hour'),
+  '1w': generateMockData(7, 155.80, 0.90, 'day'),
+  '1m': generateMockData(30, 154.50, 1.50, 'day'),
+  '1y': generateMockData(12, 142.00, 5.00, 'month'),
+  '5y': generateMockData(60, 109.50, 6.00, 'month_long'),
+  '10y': generateMockData(10, 101.20, 8.00, 'year')
 };
 
 let rateChartInstance = null;
