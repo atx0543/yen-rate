@@ -151,6 +151,156 @@ const currentRates = {
   audjpy: { base: 103.58, elementId: 'val-audjpy', changeId: 'change-audjpy', pct: 0.05, abs: 0.05 }
 };
 
+// Fetch real rates from ExchangeRate-API (free, keyless open endpoint)
+async function fetchRealRates() {
+  let currentRatesUpdated = false;
+  try {
+    // 1. Fetch current rates (base USD)
+    const response = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await response.json();
+    
+    if (data && data.rates) {
+      const rates = data.rates;
+      
+      const usdjpy = rates.JPY;
+      const eurjpy = rates.JPY / rates.EUR;
+      const gbpjpy = rates.JPY / rates.GBP;
+      const audjpy = rates.JPY / rates.AUD;
+      
+      // Update our current rates base values
+      currentRates.usdjpy.base = parseFloat(usdjpy.toFixed(2));
+      currentRates.eurjpy.base = parseFloat(eurjpy.toFixed(2));
+      currentRates.gbpjpy.base = parseFloat(gbpjpy.toFixed(2));
+      currentRates.audjpy.base = parseFloat(audjpy.toFixed(2));
+      currentRatesUpdated = true;
+
+      // Update date in floating badge
+      const dateEl = document.getElementById('floating-date');
+      if (dateEl) {
+        // Parse "Sun, 14 Jun 2026 00:00:00 +0000" into "14 Jun"
+        const parts = data.time_last_update_utc ? data.time_last_update_utc.split(' ') : [];
+        const dateStr = parts.length >= 3 ? `${parts[1]} ${parts[2]}` : '本日';
+        dateEl.textContent = `(更新: ${dateStr})`;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch current rates:', error);
+  }
+
+  // Update UI immediately with current rates if available
+  if (currentRatesUpdated) {
+    updateRatesUI();
+  }
+
+  // 2. Fetch rates range from Frankfurter to calculate real change percent safely
+  try {
+    if (currentRatesUpdated) {
+      const endDate = new Date().toISOString().split('T')[0];
+      const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const historyResponse = await fetch(`https://api.frankfurter.app/${startDate}..${endDate}?from=USD&to=JPY,EUR,GBP,AUD`);
+      const historyData = await historyResponse.json();
+      
+      if (historyData && historyData.rates) {
+        const dates = Object.keys(historyData.rates).sort();
+        if (dates.length >= 1) {
+          // Yesterday or last business day from history
+          const prevDate = dates[dates.length - 1];
+          const prevRates = historyData.rates[prevDate];
+          
+          const prevUsdjpy = prevRates.JPY;
+          const prevEurjpy = prevRates.JPY / prevRates.EUR;
+          const prevGbpjpy = prevRates.JPY / prevRates.GBP;
+          const prevAudjpy = prevRates.JPY / prevRates.AUD;
+          
+          currentRates.usdjpy.abs = currentRates.usdjpy.base - prevUsdjpy;
+          currentRates.eurjpy.abs = currentRates.eurjpy.base - prevEurjpy;
+          currentRates.gbpjpy.abs = currentRates.gbpjpy.base - prevGbpjpy;
+          currentRates.audjpy.abs = currentRates.audjpy.base - prevAudjpy;
+          
+          currentRates.usdjpy.pct = (currentRates.usdjpy.abs / prevUsdjpy) * 100;
+          currentRates.eurjpy.pct = (currentRates.eurjpy.abs / prevEurjpy) * 100;
+          currentRates.gbpjpy.pct = (currentRates.gbpjpy.abs / prevGbpjpy) * 100;
+          currentRates.audjpy.pct = (currentRates.audjpy.abs / prevAudjpy) * 100;
+          
+          updateRatesUI();
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch historical rates for comparison:', error);
+  }
+}
+
+// Separate UI update function for robustness
+function updateRatesUI() {
+  Object.keys(currentRates).forEach(key => {
+    const pair = currentRates[key];
+    const valEl = document.getElementById(pair.elementId);
+    const changeEl = document.getElementById(pair.changeId);
+    
+    if (valEl) valEl.textContent = pair.base.toFixed(2);
+    if (changeEl) {
+      if (pair.abs >= 0) {
+        changeEl.className = 'rate-change up';
+        changeEl.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> <span>+${pair.pct.toFixed(2)}% (+${pair.abs.toFixed(2)})</span>`;
+      } else {
+        changeEl.className = 'rate-change down';
+        changeEl.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> <span>${pair.pct.toFixed(2)}% (${pair.abs.toFixed(2)})</span>`;
+      }
+    }
+  });
+
+  // Also update floating badge USD/JPY
+  const floatValEl = document.getElementById('floating-usdjpy');
+  if (floatValEl) {
+    floatValEl.textContent = currentRates.usdjpy.base.toFixed(2);
+  }
+}
+
+// Fetch real history for USD/JPY chart (1m period)
+async function fetchRealHistoryChart() {
+  try {
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // fetch 45 days to cover weekends
+    
+    const response = await fetch(`https://api.frankfurter.app/${startDate}..${endDate}?from=USD&to=JPY`);
+    const data = await response.json();
+    
+    if (data && data.rates && Object.keys(data.rates).length > 0) {
+      const dates = Object.keys(data.rates).sort();
+      const labels = [];
+      const values = [];
+      
+      // Take up to latest 30 business days
+      const activeDates = dates.slice(-29); // Take 29 items, leave space for latest rate
+      activeDates.forEach(dateStr => {
+        const date = new Date(dateStr);
+        labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+        values.push(data.rates[dateStr].JPY);
+      });
+
+      // Append latest live rate from er-api to chart if available
+      if (currentRates.usdjpy.base > 100) {
+        const today = new Date();
+        labels.push(`${today.getMonth() + 1}/${today.getDate()}`);
+        values.push(currentRates.usdjpy.base);
+      }
+      
+      // Override 1m chart data
+      chartDataSets['1m'] = { labels, data: values };
+      
+      // Update chart if 1m is currently active
+      const activeTab = document.querySelector('.btn-tab.active');
+      if (activeTab && activeTab.getAttribute('data-period') === '1m') {
+        updateChart('1m');
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch historical chart data:', error);
+  }
+}
+
 function simulateLiveRates() {
   setInterval(() => {
     // Pick one pair to update randomly
@@ -158,8 +308,8 @@ function simulateLiveRates() {
     const randomKey = keys[Math.floor(Math.random() * keys.length)];
     const pair = currentRates[randomKey];
     
-    // Tiny change (-0.05 to +0.05 JPY)
-    const delta = (Math.random() - 0.49) * 0.08;
+    // Tiny tick change (-0.03 to +0.03 JPY) simulating live forex feed
+    const delta = (Math.random() - 0.49) * 0.05;
     const oldVal = pair.base;
     pair.base = parseFloat((pair.base + delta).toFixed(2));
     
@@ -168,13 +318,21 @@ function simulateLiveRates() {
     
     element.textContent = pair.base.toFixed(2);
     
+    // Sync to floating rate badge if USD/JPY updated
+    if (randomKey === 'usdjpy') {
+      const floatValEl = document.getElementById('floating-usdjpy');
+      if (floatValEl) {
+        floatValEl.textContent = pair.base.toFixed(2);
+      }
+    }
+    
     // Flash visual feedback
     if (delta > 0) {
       element.className = 'rate-value flash-up';
-      pair.abs += Math.abs(delta);
+      pair.abs += delta;
     } else {
       element.className = 'rate-value flash-down';
-      pair.abs -= Math.abs(delta);
+      pair.abs += delta; // delta is negative
     }
     
     // Reset class after animation
@@ -182,9 +340,9 @@ function simulateLiveRates() {
       element.className = 'rate-value';
     }, 800);
 
-    // Calculate new percentage change
-    const pctChange = (pair.abs / (pair.base - pair.abs)) * 100;
-    pair.pct = parseFloat(pctChange.toFixed(2));
+    // Calculate new percentage change based on initial yesterday rate
+    const initialRate = pair.base - pair.abs;
+    pair.pct = (pair.abs / initialRate) * 100;
     
     const changeElement = document.getElementById(pair.changeId);
     if (changeElement) {
@@ -196,7 +354,7 @@ function simulateLiveRates() {
         changeElement.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> <span>${pair.pct.toFixed(2)}% (${pair.abs.toFixed(2)})</span>`;
       }
     }
-  }, 4000);
+  }, 3000); // Poll simulator every 3 seconds for active feel
 }
 
 // Simulator computations
@@ -326,8 +484,13 @@ function setupEventListeners() {
 }
 
 // Entry Point
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initChart();
+  
+  // Fetch actual rates and chart data from real API
+  await fetchRealRates();
+  await fetchRealHistoryChart();
+  
   simulateLiveRates();
   runSimulator();
   setupEventListeners();
